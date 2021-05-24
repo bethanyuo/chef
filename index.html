@@ -10,7 +10,46 @@
     <div>
         <button id="btnConnect">Connect wallet</button>
         <button id="btnUserInfo">Profile</button>
+        <button id="btnOpenCreateItem">Create</button>
     </div>
+
+    <div id="userInfo">
+        <h4>User Profile</h4>
+        <input type="text" id="txtUsername" required placeholder="Enter Username">
+        <input type="text" id="txtEmail" required placeholder="Enter Email">
+        <small>Optional</small>
+
+        <img src="" width="50" height="50" id="imgAvatar" alt="">
+        <label for="fileAvatar">Select Avatar</label>
+        <input type="file" id="fileAvatar">
+
+        <button id="btnLogOut">Log out</button>
+        <button id="btnCloseUserInfo">Close</button>
+        <button id="btnSaveUserInfo">Save</button>
+
+    </div>
+
+    <div id="createItem">
+        <h4>Create Item</h4>
+        <input type="text" id="txtCreateItemName" required placeholder="Enter name">
+        <textarea id="txtCreateItemDescription" cols="30" rows="5" placeholder="Enter description"></textarea>
+        <input type="number" min="1" step="1" id="numCreateItemPrice" required placeholder="Enter price">
+
+        <label for="selectCreateItemStatus">Status</label>
+        <select id="selectCreateItemStatus">
+            <option value="0">Not for sale</option>
+            <option value="1">Instant Buy</option>
+            <option value="2">Accept Offers</option>
+        </select>
+
+        <label for="fileCreateItemFile">Select File</label>
+        <input type="file" id="fileCreateItemFile">
+
+        <button id="btnCloseCreateItem">Close</button>
+        <button id="btnCreateItem">Create!</button>
+
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
     <script src="main.js"></script>

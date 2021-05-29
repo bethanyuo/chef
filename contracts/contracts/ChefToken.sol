@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "../node_modules/@openzeppelin/contracts/token/ERC721";
+import "../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
 
 contract ChefToken is ERC721 {
@@ -26,5 +26,9 @@ contract ChefToken is ERC721 {
         return newItemId;
     }
 
-    
+    function tokenURI(uint256 tokenId) public view  override returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+
+        return Items[tokenId].uri;
+    }
 }

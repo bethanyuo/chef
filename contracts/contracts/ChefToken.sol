@@ -1,0 +1,30 @@
+pragma solidity ^0.8.0;
+
+import "../node_modules/@openzeppelin/contracts/token/ERC721";
+import "../node_modules/@openzeppelin/contracts/utils/Counters.sol";
+
+contract ChefToken is ERC721 {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIds;
+
+    constructor () ERC721("ChefToken", "CHEF") {}
+
+    struct Item {
+        uint256 id;
+        address creator;
+        string uri;
+    }
+
+    mapping (uint256 => Item) public Items;
+
+    function createItem(string memory uri) public returns (uint256) {
+        _tokenIds.increment();
+        uint256 newItemId = _tokenIds.current();
+        _safeMint(msg.sender, newItemId);
+
+        Items[newItemId] = Item(newItemId, msg.sender, uri);
+        return newItemId;
+    }
+
+    
+}

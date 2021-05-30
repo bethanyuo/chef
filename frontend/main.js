@@ -9,6 +9,7 @@ init = async () => {
     hideElement( userInfo );
     hideElement( createItemForm );
     window.web3 = await Moralis.Web3.enable();
+    window.tokenContract = new web3.eth.Contract(tokenContractABI, TOKEN_CONTRACT_ADDRESS);
     initUser();
 }
 
@@ -95,8 +96,7 @@ createItem = async () => {
     const metadata = {
         name: createItemNameField.value,
         description: createItemDescriptionField.value,
-        nftFilePath: nftFilePath,
-        nftFileHash: nftFileHash
+        image: nftFilePath
     };
 
     const nftFileMetadataFile = new Moralis.File( "metadata.json", { base64: btoa( JSON.stringify( metadata ) ) } );
@@ -105,9 +105,10 @@ createItem = async () => {
     const nftFileMetadataFilePath = nftFileMetadataFile.ipfs();
     const nftFileMetadataFileHash = nftFileMetadataFile.hash();
 
+    const nftId = await mintNft(nftFileMetadataFilePath);
+
     // Simple syntax to create a new subclass of Moralis.Object.
     const Item = Moralis.Object.extend( "Item" );
-
     // Create a new instance of that class.
     const item = new Item();
 
@@ -117,8 +118,16 @@ createItem = async () => {
     item.set('nftFileHash', nftFileHash);
     item.set('metadataFilePath', nftFileMetadataFilePath);
     item.set('metadataFileHash', nftFileMetadataFileHash);
+    item.set('nftId', nftId);
+    item.set('nftContractAddrss', TOKEN_CONTRACT_ADDRESS);
     await item.save();
     console.log(item);
+}
+
+mintNft = async (metadataUrl) => {
+    const receipt = await tokenContract.methods.createItem(metadataUrl).send({from: ethereum.selectedAddress});
+    console.log(receipt);
+    return receipt.events.Transfer.returnValues.tokenId;
 }
 
 hideElement = ( element ) => element.style.display = 'none';

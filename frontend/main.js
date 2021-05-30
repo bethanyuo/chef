@@ -3,7 +3,8 @@
 Moralis.initialize( "kaBvvlEVwlot4E7VelBssdgDVmlDTyD6rykYzrr9" );
 Moralis.serverURL = 'https://hmdky9gx8kwa.moralis.io:2053/server';
 
-const TOKEN_CONTRACT_ADDRESS = "0x8EFCE4007f94f122b8EfeF0A0a249Ce0318D87c2";
+const TOKEN_CONTRACT_ADDRESS = "0x3aD12678d7E3829A77AEEb79a9eDc3Cf6E848047";
+const MARKET_CONTRACT_ADDRESS = "0xd233Cd4E0BCA99A87a7b353122493CB81674236F";
 
 init = async () => {
     hideElement( userItemSection );
@@ -11,6 +12,7 @@ init = async () => {
     hideElement( createItemForm );
     window.web3 = await Moralis.Web3.enable();
     window.tokenContract = new web3.eth.Contract( tokenContractABI, TOKEN_CONTRACT_ADDRESS );
+    window.marketplaceContract = new web3.eth.Contract( marketplaceContractABI, MARKET_CONTRACT_ADDRESS );
     initUser();
 }
 
@@ -161,6 +163,19 @@ createItem = async () => {
     item.set( 'nftContractAddress', TOKEN_CONTRACT_ADDRESS );
     await item.save();
     console.log( item );
+    user = await Moralis.User.current();
+    const userAddress = user.get('ethAddress');
+    switch (createItemStatusField.value) {
+        case "0":
+            return;
+        case "1":
+            await ensureMarketplaceIsApproved(nftId, TOKEN_CONTRACT_ADDRESS);
+            await marketplaceContract.methods.addItemToMarket(nftId, TOKEN_CONTRACT_ADDRESS, createItemPriceField.value).send({from: userAddress});
+            break;
+        case "2":
+            alert("Not yet supported!");
+            return;
+    }
 }
 
 mintNft = async ( metadataUrl ) => {
@@ -175,6 +190,16 @@ openUserItems = async () => {
         showElement( userItemSection );
     } else {
         login();
+    }
+}
+
+ensureMarketplaceIsApproved = async (tokenId, tokenAddress) => {
+    user = await Moralis.User.current();
+    const userAddress = user.get('ethAddress');
+    const contract = new web3.eth.Contract( tokenContractABI, tokenAddress );
+    const approvedAddress = await contract.methods.getApproved(tokenId).call({from: userAddress});
+    if (approvedAddress != MARKET_CONTRACT_ADDRESS) {
+        await contract.methods.approve(MARKET_CONTRACT_ADDRESS, tokenId).send({from: userAddress});
     }
 }
 

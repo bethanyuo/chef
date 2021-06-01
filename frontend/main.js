@@ -14,6 +14,7 @@ init = async () => {
     window.tokenContract = new web3.eth.Contract( tokenContractABI, TOKEN_CONTRACT_ADDRESS );
     window.marketplaceContract = new web3.eth.Contract( marketplaceContractABI, MARKET_CONTRACT_ADDRESS );
     initUser();
+    loadItems();
 }
 
 initUser = async () => {
@@ -74,7 +75,14 @@ loadUserItems = async () => {
     const ownedItems = await Moralis.Cloud.run( "getUserItems" );
     ownedItems.forEach( item => {
         getAndRenderItemData( item, renderUserItem );
-    } )
+    } );
+}
+
+loadItems = async () => {
+    const items = await Moralis.Cloud.run( "getItems" );
+    items.forEach( item => {
+        getAndRenderItemData( item, renderItem );
+    } );
 }
 
 initTemplate = ( id ) => {
@@ -93,14 +101,31 @@ renderUserItem = ( item ) => {
     userItems.appendChild( userItem );
 }
 
+renderItem = ( item ) => {
+    const itemForSale = marketplaceItemTemplate.cloneNode( true );
+    if ( item.avatar ) {
+        itemForSale.getElementsByTagName( "img" )[0].src = item.sellerAvatar.url();
+        itemForSale.getElementsByTagName( "img" )[0].alt = item.sellerUsername;
+    }
+    itemForSale.getElementsByTagName( "img" )[1].src = item.image;
+    itemForSale.getElementsByTagName( "img" )[1].alt = item.name;
+    itemForSale.getElementsByTagName( "h5" )[0].innerText = item.name;
+    itemForSale.getElementsByTagName( "p" )[0].innerText = item.description;
+
+    itemForSale.getElementsByTagName( "button" )[0].innerText = `Buy for ${ item.askingPrice }`;
+    itemForSale.id = `item-${ item.uid }`;
+    itemsForSale.appendChild( itemForSale );
+}
+
+
 getAndRenderItemData = ( item, renderFunction ) => {
     fetch( item.tokenUri )
         .then( res => res.json() )
         .then( data => {
-            data.symbol = item.symbol;
-            data.tokenId = item.tokenId;
-            data.tokenAddress = item.tokenAddress;
-            renderFunction( data );
+            item.name = data.name;
+            item.description = data.description;
+            item.image = data.image;
+            renderFunction( item );
         } )
 
 }
@@ -164,16 +189,16 @@ createItem = async () => {
     await item.save();
     console.log( item );
     user = await Moralis.User.current();
-    const userAddress = user.get('ethAddress');
-    switch (createItemStatusField.value) {
+    const userAddress = user.get( 'ethAddress' );
+    switch ( createItemStatusField.value ) {
         case "0":
             return;
         case "1":
-            await ensureMarketplaceIsApproved(nftId, TOKEN_CONTRACT_ADDRESS);
-            await marketplaceContract.methods.addItemToMarket(nftId, TOKEN_CONTRACT_ADDRESS, createItemPriceField.value).send({from: userAddress});
+            await ensureMarketplaceIsApproved( nftId, TOKEN_CONTRACT_ADDRESS );
+            await marketplaceContract.methods.addItemToMarket( nftId, TOKEN_CONTRACT_ADDRESS, createItemPriceField.value ).send( { from: userAddress } );
             break;
         case "2":
-            alert("Not yet supported!");
+            alert( "Not yet supported!" );
             return;
     }
 }
@@ -193,13 +218,13 @@ openUserItems = async () => {
     }
 }
 
-ensureMarketplaceIsApproved = async (tokenId, tokenAddress) => {
+ensureMarketplaceIsApproved = async ( tokenId, tokenAddress ) => {
     user = await Moralis.User.current();
-    const userAddress = user.get('ethAddress');
+    const userAddress = user.get( 'ethAddress' );
     const contract = new web3.eth.Contract( tokenContractABI, tokenAddress );
-    const approvedAddress = await contract.methods.getApproved(tokenId).call({from: userAddress});
-    if (approvedAddress != MARKET_CONTRACT_ADDRESS) {
-        await contract.methods.approve(MARKET_CONTRACT_ADDRESS, tokenId).send({from: userAddress});
+    const approvedAddress = await contract.methods.getApproved( tokenId ).call( { from: userAddress } );
+    if ( approvedAddress != MARKET_CONTRACT_ADDRESS ) {
+        await contract.methods.approve( MARKET_CONTRACT_ADDRESS, tokenId ).send( { from: userAddress } );
     }
 }
 
@@ -252,4 +277,9 @@ const openUserItemsButton = document.getElementById( "btnMyItems" );
 openUserItemsButton.onclick = openUserItems;
 
 const userItemTemplate = initTemplate( "itemTemplate" );
+const marketplaceItemTemplate = initTemplate( "marketplaceItemTemplate" );
+
+// Items For Sale
+const itemsForSale = document.getElementById( "itemsForSale" );
+
 init();

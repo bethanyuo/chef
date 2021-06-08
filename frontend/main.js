@@ -1,10 +1,10 @@
 //const Moralis  = require('moralis/node');
 
-Moralis.initialize( "kaBvvlEVwlot4E7VelBssdgDVmlDTyD6rykYzrr9" );
-Moralis.serverURL = 'https://hmdky9gx8kwa.moralis.io:2053/server';
+Moralis.initialize( "DYaoXhHV97WU1u1CZA5mzDJlaQaozydfdusyg41d" );
+Moralis.serverURL = 'https://dfgqcaehicgu.moralis.io:2053/server';
 
-const TOKEN_CONTRACT_ADDRESS = "0x3aD12678d7E3829A77AEEb79a9eDc3Cf6E848047";
-const MARKET_CONTRACT_ADDRESS = "0xd233Cd4E0BCA99A87a7b353122493CB81674236F";
+const TOKEN_CONTRACT_ADDRESS = "0x0453a14649eECD94338180FCF5Fc70D206619eB1";
+const MARKET_CONTRACT_ADDRESS = "0xcee71A735c25C99A640745Dd33334b3EAc1eD2ba";
 
 init = async () => {
     hideElement( userItemSection );
